@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Categorías</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="container mt-5">
+    <h2 class="mb-4">Gestión de Categorías</h2>
+
+    <!-- Formulario para nueva categoría -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Nueva Categoría</h5>
+        <form id="formCategoria">
+          <div class="mb-3">
+            <label for="nombreCategoria" class="form-label"
+              >Nombre de la Categoría</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="nombreCategoria"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="descripcionCategoria" class="form-label"
+              >Descripción</label
+            >
+            <textarea
+              class="form-control"
+              id="descripcionCategoria"
+              rows="3"
+              required
+            ></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tabla de categorías -->
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Lista de Categorías</h5>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaCategorias">
+              <!-- Aquí se cargarán las categorías dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para editar -->
+    <div class="modal fade" id="editarModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar Categoría</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="formEditar">
+              <div class="mb-3">
+                <label class="form-label">ID</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editarId"
+                  disabled
+                  readonly
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editarNombre" class="form-label">Nombre</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editarNombre"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editarDescripcion" class="form-label"
+                  >Descripción</label
+                >
+                <textarea
+                  class="form-control"
+                  id="editarDescripcion"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="btnGuardarEdicion"
+            >
+              Guardar cambios
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS y Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./assets/js/categorias.js"></script>
+  </body>
+</html>
