@@ -144,32 +144,38 @@ async function guardarEdicion(id, nombre, descripcion) {
 
 // Event Listeners
 document.addEventListener("DOMContentLoaded", () => {
-  // Cargar categorías al iniciar
-  obtenerCategorias();
+  if (sessionStorage.getItem("isAdmin")) {
+// Cargar categorías al iniciar
+obtenerCategorias();
 
-  // Manejar el formulario de nueva categoría
-  document
-    .getElementById("formCategoria")
-    .addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const nombre = document.getElementById("nombreCategoria").value.trim();
-      const descripcion = document
-        .getElementById("descripcionCategoria")
-        .value.trim();
-      if (await crearCategoria(nombre, descripcion)) {
-        e.target.reset();
-      }
-    });
+// Manejar el formulario de nueva categoría
+document
+  .getElementById("formCategoria")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nombre = document.getElementById("nombreCategoria").value.trim();
+    const descripcion = document
+      .getElementById("descripcionCategoria")
+      .value.trim();
+    if (await crearCategoria(nombre, descripcion)) {
+      e.target.reset();
+    }
+  });
 
-  // Manejar el guardado de edición
-  document
-    .getElementById("btnGuardarEdicion")
-    .addEventListener("click", async () => {
-      const id = document.getElementById("editarId").value;
-      const nombre = document.getElementById("editarNombre").value.trim();
-      const descripcion = document
-        .getElementById("editarDescripcion")
-        .value.trim();
-      await guardarEdicion(id, nombre, descripcion);
-    });
+// Manejar el guardado de edición
+document
+  .getElementById("btnGuardarEdicion")
+  .addEventListener("click", async () => {
+    const id = document.getElementById("editarId").value;
+    const nombre = document.getElementById("editarNombre").value.trim();
+    const descripcion = document
+      .getElementById("editarDescripcion")
+      .value.trim();
+    await guardarEdicion(id, nombre, descripcion);
+  });
+  } else {
+    alert("No tienes permisos para acceder a esta página");
+    window.location.href = "login.html";
+  }
+  
 });

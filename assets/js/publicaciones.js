@@ -110,43 +110,98 @@ class GestionPublicaciones {
     contenedor.innerHTML = "";
 
     this.publicaciones.listaEntradas.forEach((publicacion) => {
-      const col = document.createElement("div");
-      col.className = "col-md-6 col-lg-4 mb-4";
-      console.log(this.obtenerNombreCategoria(publicacion.categoria_id));
-      col.innerHTML = `
-            <div class="card h-100 shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title">${publicacion.titulo}</h5>
-                <span class="badge bg-primary mb-2">${this.obtenerNombreCategoria(
-                  publicacion.categoria_id
-                ).then((result) => {
-                  `${result}`;
-                  console.log(result);
-                })}</span>
-                <p class="card-text">${this.formatearDetalle(
-                  publicacion.detalle
-                )}</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <small class="text-muted">${this.formatearFecha(
-                    publicacion.fecha
-                  )}</small>
-                  <div class="btn-group">
-                    <button class="btn btn-sm btn-warning" onclick="gestionPublicaciones.editarPublicacion('${
-                      publicacion._id
-                    }')">
-                      <i class="bi bi-pencil"></i> Editar
-                    </button>
-                    <button class="btn btn-sm btn-danger" onclick="gestionPublicaciones.eliminarPublicacion('|${
-                      publicacion._id
-                    }')">
-                      <i class="bi bi-trash"></i> Eliminar
-                    </button>
+      // Solicitud GET (Request).
+      fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.buscarCategoria}/${publicacion.categoria_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+        // Exito
+        .then((response) => response.json()) // convertir a json
+        .then((json) => {
+          const col = document.createElement("div");
+          col.className = "col-md-6 col-lg-4 mb-4";
+          sessionStorage.getItem("isAdmin")
+            ? (col.innerHTML += `<div class="card h-100 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">${publicacion.titulo}</h5>
+                  <span class="badge bg-primary mb-2">${
+                    json.consulta.nombre
+                  }</span>
+                  <p class="card-text">${this.formatearDetalle(
+                    publicacion.detalle
+                  )}</p>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">${this.formatearFecha(
+                      publicacion.fecha
+                    )}</small><div class="btn-group">
+                      <button class="btn btn-sm btn-warning" onclick="gestionPublicaciones.editarPublicacion('${publicacion._id}')">
+                        <i class="bi bi-pencil"></i> Editar
+                      </button>
+                      <button class="btn btn-sm btn-danger" onclick="gestionPublicaciones.eliminarPublicacion('${publicacion._id}')">
+                        <i class="bi bi-trash"></i> Eliminar
+                      </button>
+
+                    </div>
+                    </div>
+              </div>
+              </div>`)
+            : (col.innerHTML += `<div class="card h-100 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">${publicacion.titulo}</h5>
+                  <span class="badge bg-primary mb-2">${
+                    json.consulta.nombre
+                  }</span>
+                  <p class="card-text">${this.formatearDetalle(
+                    publicacion.detalle
+                  )}</p>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">${this.formatearFecha(
+                      publicacion.fecha
+                    )}</small>
                   </div>
                 </div>
+                        <!-- Sección de Comentarios -->
+        <div class="card-footer bg-light p-3">
+          <div class="comentarios-seccion">
+            <!-- Botón para mostrar/ocultar comentarios -->
+            <button class="btn btn-link p-0 mb-3" 
+                    onclick="gestionPublicaciones.toggleComentarios('${publicacion._id}')">
+              <i class="bi bi-chat-text"></i> Ver comentarios
+            </button>
+
+            <!-- Contenedor de comentarios -->
+            <div id="comentarios-${publicacion._id}" class="comentarios-container d-none">
+              <!-- Formulario para nuevo comentario -->
+              <form class="form-comentario mb-3">
+                <input type="hidden" name="entrada_id" value="${publicacion._id}">
+                <div class="input-group">
+                  <textarea class="form-control form-control-sm" 
+                           name="detalle" 
+                           rows="1" 
+                           placeholder="Escribe un comentario..."
+                           required></textarea>
+                  <button class="btn btn-primary btn-sm" type="submit">
+                    <i class="bi bi-send"></i>
+                  </button>
+                </div>
+              </form>
+
+              <!-- Lista de comentarios -->
+              <div class="comentarios-lista">
+                <!-- Los comentarios se cargarán dinámicamente aquí -->
               </div>
             </div>
-          `;
-      contenedor.appendChild(col);
+          </div>
+        </div>
+              </div>
+            `);
+          contenedor.appendChild(col);
+        });
     });
   }
   // Método para formatear el detalle
@@ -154,7 +209,21 @@ class GestionPublicaciones {
     // Limitar el detalle a 150 caracteres y agregar puntos suspensivos
     return detalle.length > 150 ? detalle.substring(0, 150) + "..." : detalle;
   }
+  // Agregar método para mostrar/ocultar comentarios
+  toggleComentarios(publicacionId) {
+    const comentariosContainer = document.getElementById(
+      `comentarios-${publicacionId}`
+    );
+    const estaOculto = comentariosContainer.classList.contains("d-none");
 
+    if (estaOculto) {
+      comentariosContainer.classList.remove("d-none");
+      // Cargar comentarios solo cuando se muestran
+      gestionComentarios.cargarComentarios(publicacionId);
+    } else {
+      comentariosContainer.classList.add("d-none");
+    }
+  }
   // Método para formatear la fecha
   formatearFecha(fecha) {
     if (!fecha) return "Sin fecha";
@@ -163,30 +232,6 @@ class GestionPublicaciones {
       month: "long",
       day: "numeric",
     });
-  }
-
-  async obtenerNombreCategoria(categoriaId) {
-    try {
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.buscarCategoria}/${categoriaId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const categoria = await response.json();
-      return categoria.consulta.nombre;
-    } catch (error) {
-      console.error("Error al buscar la categoría:", error);
-      return "Sin categoría";
-    }
   }
 
   // Preparar edición de publicación
@@ -279,7 +324,6 @@ class GestionPublicaciones {
       if (!response.ok) {
         throw new Error(`Error HTTP: ${response.status}`);
       }
-
       return await response.json();
     } catch (error) {
       throw new Error(`Error al crear la entrada: ${error.message}`);
@@ -298,7 +342,7 @@ class GestionPublicaciones {
           body: JSON.stringify(datos),
         }
       );
-
+      console.log(response);
       if (!response.ok) {
         throw new Error(`Error HTTP: ${response.status}`);
       }
@@ -342,15 +386,18 @@ class GestionPublicaciones {
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.borrarEntrada}/${id}`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
-
+      console.log(response);
       if (!response.ok) {
         throw new Error(`Error HTTP: ${response.status}`);
       }
 
       this.mostrarMensaje("Publicación eliminada con éxito");
-      this.cargarPublicaciones();
+      await this.cargarPublicaciones();
     } catch (error) {
       this.mostrarMensaje(error.message, true);
     }
@@ -383,6 +430,7 @@ class GestionPublicaciones {
 
       // Manejar respuesta exitosa
       this.mostrarMensaje("Publicación creada con éxito");
+      await this.cargarPublicaciones();
       this.resetearFormulario();
 
       // Aquí podrías actualizar la lista de publicaciones si es necesario

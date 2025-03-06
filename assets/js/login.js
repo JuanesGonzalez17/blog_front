@@ -42,40 +42,29 @@ class LoginUsuario {
   // Enviar petición de login
   async enviarLogin(datos) {
     try {
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.login}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(datos),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Error en la autenticación");
-      }
-
-      return await response.json();
+      await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.login}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(datos),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.isAdmin) {
+            sessionStorage.setItem("userId", data.usuario);
+            sessionStorage.setItem("isAdmin", data.isAdmin);
+          } else {
+            sessionStorage.setItem("userId", data.usuario);
+          }
+        });
     } catch (error) {
       throw new Error(`Error en el login: ${error.message}`);
     }
   }
 
   // Manejar la respuesta exitosa
-  manejarLoginExitoso(respuesta) {
-    // Guardar el token si la API lo devuelve
-    if (respuesta.token) {
-      localStorage.setItem("authToken", respuesta.token);
-    }
-
-    // Guardar datos del usuario si es necesario
-    if (respuesta.usuario) {
-      localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
-    }
-
+  manejarLoginExitoso() {
     this.mostrarMensaje("Login exitoso");
     this.redirigirUsuario();
   }
@@ -83,7 +72,7 @@ class LoginUsuario {
   // Redirigir después del login
   redirigirUsuario() {
     // Aquí puedes redirigir al usuario a la página que corresponda
-    // window.location.href = '/dashboard';
+    window.location.href = "publicaciones.html";
   }
 
   // Sistema de notificaciones
@@ -114,10 +103,10 @@ class LoginUsuario {
       // Validar credenciales
       this.validarCredenciales();
 
-      const respuesta = await this.enviarLogin(this.campos);
+      await this.enviarLogin(this.campos);
 
       // Manejar respuesta exitosa
-      this.manejarLoginExitoso(respuesta);
+      this.manejarLoginExitoso();
       this.resetearFormulario();
     } catch (error) {
       this.mostrarMensaje(error.message, true);
