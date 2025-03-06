@@ -51,11 +51,15 @@ class LoginUsuario {
       })
         .then((response) => response.json())
         .then((data) => {
-          if (data.isAdmin) {
-            sessionStorage.setItem("userId", data.usuario);
-            sessionStorage.setItem("isAdmin", data.isAdmin);
+          if (data.estado) {
+            if (data.isAdmin) {
+              sessionStorage.setItem("userId", data.usuario);
+              sessionStorage.setItem("isAdmin", data.isAdmin);
+            } else {
+              sessionStorage.setItem("userId", data.usuario);
+            }
           } else {
-            sessionStorage.setItem("userId", data.usuario);
+            throw new Error(data.mensaje);
           }
         });
     } catch (error) {
